@@ -1,0 +1,205 @@
+## Set the working directory to load the data
+
+setwd("H:/My Documents/29.StatWithR/June17/W4assignment/assignment")
+
+## Load the data
+
+download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",
+                      destfile = "Dataset.zip")
+
+library(dplyr)
+
+## Q1 : Merges the training and the test sets to create one dataset
+
+## Read the test labels and test set files
+
+testsubject <-
+ read.table("subject_test.txt",
+            header = FALSE,
+            dec = ".",
+            sep = "")
+testlabels <-
+ read.table("y_test.txt",
+            header = FALSE,
+            dec = ".",
+            sep = "")
+testdata <-
+ read.table(
+   file = "x_test.txt",
+   header = FALSE,
+   dec = ".",
+   sep = ""
+ )
+testtraininfo <- as.vector("test")
+
+
+## create test dataset inclunding subject and label
+
+addtest <-
+ cbind.data.frame(testtraininfo, testlabels, testsubject, testdata)
+
+
+## Read the train labels and train set files
+
+trainsubject <-
+  read.table("subject_train.txt",
+             header = FALSE,
+            dec = ".",
+            sep = "")
+trainlabels <-
+  read.table("y_train.txt",
+             header = FALSE,
+             dec = ".",
+            sep = "")
+traindata <-
+  read.table(
+    file = "x_train.txt",
+    header = FALSE,
+   dec = ".",
+    sep = ""
+  )
+testtraininfo <- as.vector("train")
+
+
+
+## create train dataset inclunding subject and label
+
+addtrain <-
+  cbind.data.frame(testtraininfo, trainlabels, trainsubject, traindata)
+
+## create dataset inclunding subject, label, train and test data
+
+onedataset <- rbind.data.frame(addtest, addtrain)
+
+## rename the first columns of the merged dataframe
+
+keepnames <- colnames(onedataset[4:564])
+colnames(onedataset) <- c("info", "activity", "subject", keepnames)
+
+# ## Q2 : Extracts only the measurements on the mean and standard deviation for each measurement
+
+
+meanSD <-
+  select(
+    onedataset,
+    c(
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      204,
+      205,
+      217,
+      218,
+      230,
+      231,
+      243,
+      244,
+      256,
+      257,
+      269,
+      270,
+      271,
+      272,
+      273,
+      274,
+      348,
+      349,
+      350,
+      351,
+      352,
+      353,
+      427,
+      428,
+      429,
+      430,
+      431,
+      432,
+      506,
+      507,
+      532,
+      533,
+      545,
+      546
+    )
+  )
+# # 
+# # ## Q3 : Uses descriptive activity names to name the activities in the data set
+# 
+for (i in c(1:6)) {
+    activity <-
+    c(
+      "waking",
+      "walking_upstairs",
+      "walking_downstairs",
+      "sitting",
+      "standing",
+      "laying"
+    )
+  meanSDacti <-
+    gsub(pattern = i,
+         replacement = activity[i],
+         meanSDact)
+  meanSDact = meanSDacti
+}
+
+meanSD <- cbind.data.frame(meanSD, meanSDact)
+meanSD <- meanSD[,-c(2)]
+meanSD <- select(meanSD, c(1, 61, c(2:60)))
+
+## Q4 : Appropriately labels the data set with descriptive variable names
+
+features <-
+    read.table("features.txt",
+               header = FALSE,
+               dec = ".",
+               sep = "")
+
+colnamesdata <- colnames(meanSD)
+
+colnamesdata <- gsub(pattern = "V", replacement = "", colnamesdata)
+
+colnamesdata <- as.data.frame(colnamesdata)
+
+colnames(colnamesdata) <- "colcheck"
+
+
+colnames(features) <- c("colcheck", "variable")
+
+
+resultat <- merge(x = features, y=colnamesdata, by.y = "colcheck")
+
+variablenames <- as.vector(resultat[,2])
+colnames(meanSD) <- c("info", "activity", "subject", variablenames)
+
+## Q5 : calculate the average of each variable for each activity and each subject
+
+
+meanSD[,4:61] <- lapply(meanSD[,4:61], as.numeric)
+meanSD2 <- meanSD[,2:61]
+byactisub <- group_by(meanSD2, activity, subject)
+resfinal <- summarise_all(byactisub, mean)
+write.csv2(resfinal, file = "tidydata.csv")
