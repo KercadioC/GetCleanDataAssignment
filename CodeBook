@@ -1,0 +1,51 @@
+Set the working directory to load the data
+Load the data
+Call dplyr library
+Q1 : Merges the training and the test sets to create one dataset
+  Read the test labels and test set files
+      variable testsubject : subject who performed the activity (test group)
+      variable testlabels : activity performed (test group)
+      variable testdata : measures for the activity/ subject (test group)
+      variable testtraininfo : gives the information that it is the test group
+    
+  Create test dataset including subject and label
+      addtest : data frame with testtraininfo, testlabels, testsubject, testdata
+
+  Read the train labels and train set files
+      variable trainsubject : subject who performed the activity (training group)
+      variable trainlabels : activity performed (training group)
+      variable traindata : measures for the activity/ subject (training group)
+      variable testtraininfo : gives the information that it is the training group
+
+  create train dataset inclunding subject and label
+      addtrain : data frame with trainsubject, trainlabels, traindata, testtraininfo
+  
+  create dataset inclunding subject, label, train and test data
+      onedataset : data frame with addtrain and addtest info
+
+  rename the first columns of the merged dataframe
+      keepnames <- colnames(onedataset[4:564])
+      colnames(onedataset) <- c("info", "activity", "subject", keepnames)
+
+Q2 : Extracts only the measurements on the mean and standard deviation for each measurement
+  meanSD : data frame with only mean and sd (select from onedataset)
+  
+Q3 : Uses descriptive activity names to name the activities in the data set
+  Loop to rename the activities based on the number of the activity (from 1 to 6) using gsub to replace the name 
+  add the column meanSDact containing the name of the activity to meanSD
+  delete the column with the number of the activity
+  Change the order of the columns to get the activity label in the second column of meanSD data frame
+
+Q4 : Appropriately labels the data set with descriptive variable names
+  Variable features : store the feature data
+  colnamesdata : get the variable names of meanSD, remove the "V" in the column names
+  colnamesdata : convert colnamesdata in a data frame, rename the column "colcheck"
+  Rename the column of features data frame into colcheck and variable
+  Merge the colnamesdata and features data frame by colcheck
+
+Q5 : calculate the average of each variable for each activity and each subject
+  Convert columns 4 to 61 of meanSD into numeric variables
+  meanSD2 : select columns 2 to 61 from meanSD
+  byactisub : group the data of meanSD2 by activity and subject
+  resfinal : calculate the mean on groupped data
+  write the result into a csv file. 
